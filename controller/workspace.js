@@ -16,6 +16,7 @@ router.get('/', async (req, res) => {
         JOIN user ON workspace.manager = user.id
         WHERE name LIKE '%${search}%' 
         ${manager_id == null ? '' : `AND manager = ${manager_id}`}
+        ORDER BY name
         `);
         res.json(result.map((value) => {
             var user = {};
@@ -166,6 +167,7 @@ router.post('/:id/member/add', async (req, res) => {
     }
 })
 
+//Cấp và thu hồi quyền leader
 router.post('/:id/member/update', async (req, res) => {
     try {
         const id = req.params.id;

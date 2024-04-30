@@ -4,6 +4,7 @@ const http = require('http');
 const admin = require('./controller/admin');
 const user = require('./controller/user');
 const workspace = require('./controller/workspace');
+const view = require('./controller/view');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/admin', admin);
 app.use('/user', user);
 app.use('/workspace', workspace);
+app.use('/view', view);
 
 server.listen(port, () => {
     console.log(`Starting on http://localhost:${port}`);
