@@ -17,10 +17,10 @@ router.get('/', async (req, res) => {
             throw new Error("Only 1 of 2 parameter can be included (workspace_id or user_id)");
 
         const result = await query(`
-        SELECT view.*, username, avatar, firstname, lastname 
+        SELECT DISTINCT view.*, username, avatar, firstname, lastname 
         FROM view
-        JOIN user ON view.leader_id = user.id
-        JOIN permission ON view.id = permission.view_id
+        LEFT JOIN user ON view.leader_id = user.id
+        LEFT JOIN permission ON view.id = permission.view_id
         WHERE name LIKE '%${search}%' AND
         ${workspace_id != null ?
         `workspace_id = '${workspace_id}'` : 
@@ -225,7 +225,7 @@ router.get('/:id/content', async (req, res) => {
                     user.lastname = value.lastname;
                     value.assigner = user;
                 }
-                delete value.decription;
+                delete value.description;
                 delete value.username;
                 delete value.avatar;
                 delete value.firstname;
