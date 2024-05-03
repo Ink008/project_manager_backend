@@ -63,7 +63,7 @@ router.get('/member', async (req, res) => {
 })
 
 //Lấy user cụ thể
-router.get('/:id', async (req, res) => {
+router.get('/id=:id', async (req, res) => {
     try {
         const id = req.params.id;
         if(id == null) throw new Error("Don't have enough parameter");
@@ -153,13 +153,8 @@ router.post('/update_manager', async (req, res) => {
             SELECT * FROM workspace
             WHERE manager = ${id}
             `);
-            if(result.length > 0) {
-                res.json({
-                    success: false,
-                    message: "This user is still managing some workspace, please tranfer this user's workspace to other manager"
-                });
-                return;
-            }
+            if(result.length > 0) 
+                throw new Error("This user is still managing some workspace, please tranfer this user's workspace to other manager");
         }
         
         var result = await query(`
@@ -183,6 +178,13 @@ router.get('/delete', async (req, res) => {
     try {
         const id = req.query.id;
         if(id == null) throw new Error("Don't have enough parameter");
+
+        //Kiểm tra nếu user này có quản lý workspace ko
+        const workspaces = await query(`
+        SELECT * FROM workspace WHERE manager = ${id}
+        `);
+        if(workspaces.length > 0) 
+            throw new Error("This user is still managing some workspace, please tranfer this user's workspace to other manager");
 
         const result = await query(`
         DELETE FROM user WHERE ID = '${id}'`);

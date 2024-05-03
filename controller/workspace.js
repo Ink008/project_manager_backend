@@ -143,13 +143,8 @@ router.post('/:id/member/add', async (req, res) => {
         JOIN workspace ON member.workspace_id = workspace.id
         WHERE member_id = '${user_id}'
         `);
-        if(result.length > 0) {
-            res.json({
-                success: false,
-                message: `This user's already a member of ${result[0].name} workspace`
-            });
-            return;
-        }
+        if(result.length > 0) 
+            throw new Error(`This user's already a member of ${result[0].name} workspace`);
 
         result = await query(`
         INSERT INTO member VALUES 
