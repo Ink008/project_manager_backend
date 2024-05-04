@@ -12,17 +12,19 @@ router.get('/', async (req, res) => {
         const result = await query(`
         SELECT task.*, username, avatar, firstname, lastname 
         FROM task
-        JOIN user ON task.assigner = user.id
+        LEFT JOIN user ON task.assigner = user.id
         WHERE task.ID = ${id}
         `);
         var value = result[0];
-        var user = {};
-        user.id = value.assigner;
-        user.username = value.username;
-        user.avatar = value.avatar;
-        user.firstname = value.firstname;
-        user.lastname = value.lastname;
-        value.assigner = user;
+        if(value.assigner != null) {
+            var user = {};
+            user.id = value.assigner;
+            user.username = value.username;
+            user.avatar = value.avatar;
+            user.firstname = value.firstname;
+            user.lastname = value.lastname;
+            value.assigner = user;
+        }
         value.is_complete = value.is_complete == 1;
         delete value.username;
         delete value.avatar;
