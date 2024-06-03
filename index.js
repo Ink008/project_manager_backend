@@ -3,6 +3,7 @@ const http = require('http');
 
 const admin = require('./controller/admin');
 const user = require('./controller/user');
+const invite = require('./controller/invite');
 const workspace = require('./controller/workspace');
 const view = require('./controller/view');
 const status = require('./controller/status');
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use('/admin', admin);
 app.use('/user', user);
+app.use('/invite', invite);
 app.use('/workspace', workspace);
 app.use('/view', view);
 app.use('/status', status);

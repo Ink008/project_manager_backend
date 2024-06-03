@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
             user.avatar = value.avatar;
             user.firstname = value.firstname;
             user.lastname = value.lastname;
-            value.leader = user;
+            value.leader = user.id != null ? user : null;
             delete value.leader_id;
             delete value.username;
             delete value.avatar;
@@ -43,6 +43,47 @@ router.get('/', async (req, res) => {
             delete value.lastname;
             return value;
         }));
+    } catch (error) {
+        console.log(error);
+        res.json(error);
+    }
+})
+
+//Lấy view cụ thể
+router.get('/id=:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if(id == null) 
+            throw new Error("Don't have enough parameter");
+
+        const result = await query(`
+        SELECT DISTINCT view.*, username, avatar, firstname, lastname 
+        FROM view
+        LEFT JOIN user ON view.leader_id = user.id
+        LEFT JOIN permission ON view.id = permission.view_id
+        WHERE view.id = ${id}
+        `);
+
+        if(result.length == 0) {
+            res.json(null);
+            return;
+        }
+        res.json(result.map((value) => {
+            var user = {};
+            user.id = value.leader_id;
+            user.username = value.username;
+            user.avatar = value.avatar;
+            user.firstname = value.firstname;
+            user.lastname = value.lastname;
+            value.leader = user.id != null ? user : null;
+            delete value.leader_id;
+            delete value.username;
+            delete value.avatar;
+            delete value.firstname;
+            delete value.lastname;
+            return value;
+        })[0]);
     } catch (error) {
         console.log(error);
         res.json(error);

@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
         `);
         res.json(result.map((value) => {
             value.is_manager = value.is_manager == 1;
-            return value; 
+            return value;
         }));
     } catch (error) {
         console.log(error);
@@ -44,12 +44,13 @@ router.get('/', async (req, res) => {
 router.get('/member', async (req, res) => {
     try {
         const search = req.query.search || "";
+        const is_leader = req.query.is_leader == 'true';
 
         const result = await query(`
         SELECT * FROM user
         WHERE (username LIKE '%${search}%' OR firstname LIKE '%${search}%' OR lastname LIKE '%${search}%')
-        AND is_manager = 0
-        ORDER BY CONCAT(firstname, ' ', lastname)
+        AND is_manager = ${is_leader ? '1' : '0'}
+        ORDER BY username
         `);
         res.json(result.map((value) => {
             delete value.is_manager;
@@ -69,7 +70,11 @@ router.get('/id=:id', async (req, res) => {
         if(id == null) throw new Error("Don't have enough parameter");
 
         const result = await query(`SELECT * FROM user WHERE id = ${id}`);
-        if(result.length == 0) res.json(null);
+        
+        if(result.length == 0) {
+            res.json(null);
+            return;
+        }
         result[0].is_manager = result[0].is_manager == 1;
         res.json(result[0]);
     } catch (error) {
