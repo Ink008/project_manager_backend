@@ -25,7 +25,6 @@ router.get('/', async (req, res) => {
             user.lastname = value.lastname;
             value.assigner = user;
         }
-        value.is_complete = value.is_complete == 1;
         delete value.username;
         delete value.avatar;
         delete value.firstname;
@@ -45,7 +44,7 @@ router.post('/add', async (req, res) => {
         if(status_id == null || position == null) throw new Error("Don't have enough parameter");
 
         const result = await query(`
-        INSERT INTO task VALUES (NULL, '${status_id}', NULL, '${name}', '', '${position}', NULL, NULL, 0)`);
+        INSERT INTO task VALUES (NULL, '${status_id}', NULL, '${name}', '', '${position}', NULL, NULL, NULL)`);
         res.json({
             success: result.affectedRows > 0
         });
@@ -66,7 +65,7 @@ router.post('/update', async (req, res) => {
         const description = req.body.description;
         const due_date = req.body.due_date;
         const reminder_date = req.body.reminder_date;
-        const is_complete = req.body.is_complete;
+        const completed_date = req.body.completed_date;
         if(id == null || !name) throw new Error("Don't have enough parameter");
         let sql = `UPDATE task SET Name = '${name}'`;
         if (req.body.hasOwnProperty('description')) 
@@ -77,8 +76,8 @@ router.post('/update', async (req, res) => {
             sql += `, due_date = ${due_date != null ? `'${due_date}'` : `NULL`}`;
         if (req.body.hasOwnProperty('reminder_date')) 
             sql += `, reminder_date = ${reminder_date != null ? `'${reminder_date}'` : `NULL`}`;
-        if (req.body.hasOwnProperty('is_complete')) 
-            sql += `, is_complete = ${is_complete ? `1` : `0`}`;
+        if (req.body.hasOwnProperty('completed_date')) 
+            sql += `, completed_date = ${completed_date != null ? `'${completed_date}'` : `NULL`}`;
 
         sql += ` WHERE task.id = ${id}`;
         const result = await query(sql);

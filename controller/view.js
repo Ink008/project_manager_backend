@@ -256,7 +256,6 @@ router.get('/:id/content', async (req, res) => {
             ORDER BY position
             `);
             status.tasks = tasks.map((value) => {
-                value.is_complete = value.is_complete == 1;
                 if(value.assigner != null) {
                     var user = {};
                     user.id = value.assigner;
