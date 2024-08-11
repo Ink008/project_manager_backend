@@ -36,6 +36,28 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/notifications', async (req, res) => {
+    try {
+        const user_id = req.query.user_id;
+        if(user_id == null) 
+            throw new Error("Don't have enough parameter");
+        
+        const result = await query(`
+        SELECT leader_id, task.* FROM task
+        JOIN status ON task.status_id = status.id
+        JOIN view ON status.view_id = view.id
+        WHERE (leader_id = ${user_id} OR task.assigner = ${user_id})
+        AND due_date IS NOT NULL
+        ORDER BY due_date
+        `);
+
+        res.json(result);
+    } catch (error) {
+        console.log(error);
+        res.json(error);
+    }
+})
+
 router.post('/add', async (req, res) => {
     try {
         const name = req.body.name || '';
