@@ -1,5 +1,8 @@
 const express = require("express");
 const { query } = require("../config/config");
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
 
@@ -144,6 +147,13 @@ router.get('/delete', async (req, res) => {
 
         await query(`
         CALL delete_task('${id}')`);
+        
+        // Delete folder
+        const folder_path = path.join('uploads', 'task', id);
+        if(fs.existsSync(folder_path)) {
+            fs.rmSync(folder_path, { recursive: true, force: true });
+        }
+
         res.json({
             success: true
         });
@@ -155,5 +165,93 @@ router.get('/delete', async (req, res) => {
         });
     }
 })
+
+//File Manager API
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const { id } = req.params;
+        const upload_path = path.join('uploads', 'task', id);
+        // Tạo thư mục nếu chưa tồn tại
+        try {
+            fs.accessSync(upload_path);
+        } catch (e) {
+            fs.mkdirSync(upload_path, { recursive: true });
+        }
+        cb(null, upload_path);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Buffer.from(file.originalname, 'latin1').toString('utf8')); // Lưu file với tên gốc
+    }
+});
+
+const upload = multer({ storage: storage });
+
+router.post('/:id/upload', upload.array('files'), (req, res) => {
+    res.json({
+        message: true,
+        files: req.files,
+    });
+});
+
+router.get('/:id/file', (req, res) => {
+    const { id } = req.params;
+    try {
+        const folder_path = path.join('uploads', 'task', id);
+        if(!fs.existsSync(folder_path)) {
+            res.json([]);
+        } else {
+            const files = fs.readdirSync(folder_path);
+            res.json(files);
+        }
+    } catch (error) {
+        console.log(error);
+        res.json(error);
+    }
+});
+
+router.get('/:id/file/download/:name', (req, res) => {
+    const { id, name } = req.params;
+    console.log('hello');
+    try {
+        if(id == null || name == null) 
+            throw new Error("Don't have enough parameter");
+        const file_path = path.join('uploads', 'task', id, name);
+        if(!fs.existsSync(file_path)) 
+            throw new Error(`${name} doesn't exist`);
+        else {
+            res.download(file_path);
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+router.get('/:id/file/delete/:name', (req, res) => {
+    const { id, name } = req.params;
+    console.log('hello');
+    try {
+        if(id == null || name == null) 
+            throw new Error("Don't have enough parameter");
+        const file_path = path.join('uploads', 'task', id, name);
+        if(!fs.existsSync(file_path)) 
+            throw new Error(`${name} doesn't exist`);
+        else {
+            fs.unlinkSync(file_path);
+            res.json({
+                success: true
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
 
 module.exports = router;
