@@ -11,6 +11,7 @@ const workspace = require('./controller/workspace');
 const view = require('./controller/view');
 const status = require('./controller/status');
 const task = require('./controller/task');
+const comment = require('./controller/comment');
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +32,7 @@ app.use('/workspace', workspace);
 app.use('/view', view);
 app.use('/status', status);
 app.use('/task', task);
+app.use('/comment', comment);
 
 //Web Socket Part
 const connections = {};

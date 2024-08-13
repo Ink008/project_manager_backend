@@ -254,4 +254,32 @@ router.get('/:id/file/delete/:name', (req, res) => {
     }
 });
 
+router.get('/:id/view', async (req, res) => {
+    try {
+        const task_id = req.params.id;
+        if (task_id == null) {
+            throw new Error("Don't have enough parameter");
+        }
+        const result = await query(`
+            SELECT view.*
+            FROM task 
+            JOIN status ON task.status_id = status.id 
+            JOIN view ON status.view_id = view.id
+            WHERE task.id = ${task_id}
+        `);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        const viewDetails = result[0];
+        res.json(viewDetails);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;
